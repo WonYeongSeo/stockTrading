@@ -1,0 +1,2 @@
+python auto_trading_condition.py
+python shutdown.py
