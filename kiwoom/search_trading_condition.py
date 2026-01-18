@@ -71,9 +71,9 @@ def auto_trading(token, old_holding_codes) :
 # 조건검색된 종목 중 매수조건에 해당되면 매수 -------------------------------------------------------------------------------------------------------
 def process_condition_buy(token, conditions, holdings, buys, is_jump) :
     try :
-        __seq = '1' # 3분급등조건
+        __seq = '0' # 3분급등조건
         if is_jump :
-            __seq = '0' # 1분급등조건
+            __seq = '1' # 1분급등조건
 
         __stocks = kiwoom_condition.search(token, __seq)
 
