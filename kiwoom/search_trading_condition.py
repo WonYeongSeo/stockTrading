@@ -54,7 +54,7 @@ def auto_trading(token, old_holding_codes) :
 
             elif datetime.now() > CONST_JUMP_START_TIME :
                 # 당일 매수한 종목에 대한 매도처리
-                process_sell(token, today_holdings, True)
+                # process_sell(token, today_holdings, True)
 
                 # 검색한 종목에 대한 매수처리
                 process_condition_buy(token, conditions, holdings, buys, True)
@@ -130,7 +130,6 @@ def process_condition_buy(token, conditions, holdings, buys, is_jump) :
                                 # 매수할 단가 구하기
                                 __buyprice = util.get_buy_price(s.price, is_jump)
 
-                                condition_logging(True, ' 테스트로그 매수진행: ' + str(s.name) + '/' + str(s.price) + '/' + str(__buyprice) + '/' + str(c.name) + '/' + str(c.price))
                                 # 종목당 매수할 총 금액이 매수금액보다 큰 경우에만 매수 호출
                                 if __buy_total_prc > __buyprice :
                                     __buy_qty = int(__buy_total_prc / __buyprice)
@@ -151,13 +150,9 @@ def process_condition_buy(token, conditions, holdings, buys, is_jump) :
                                     __buy_total_prc = api.deposit(token)
 
                             elif int(s.price) > int(c.price) :
-                                condition_logging(True, ' 테스트로그 매수대기 종목대체 전: ' +  str(c.name) + '/' + str(c.price) + '/' + str(s.price))
                                 c.price = s.price
-                                condition_logging(True, ' 테스트로그 매수대기 종목대체 후: ' +  str(c.name) + '/' + str(c.price))
                         elif int(s.price) > int(c.price) :
-                            condition_logging(True, ' 테스트로그 종목대체 전: ' +  str(c.name) + '/' + str(c.price) + '/' + str(s.price))
                             c.price = s.price
-                            condition_logging(True, ' 테스트로그 종목대체 후: ' +  str(c.name) + '/' + str(c.price))
                         # elif __high_check_price < s.h_price :
                         #     conditions.remove(c)
                     elif int(s.price) < CONST_BUY_TOTAL_PRICE :
