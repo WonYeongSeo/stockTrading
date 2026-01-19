@@ -88,10 +88,10 @@ def process_condition_buy(token, conditions, holdings, buys, is_jump) :
             else :
                 __is_buy = False
 
-                # 예수금 조회
-                __buy_total_prc = api.deposit(token)
-
                 for s in __stocks :
+                    # 예수금 조회
+                    __buy_total_prc = api.deposit(token)
+
                     # 예수금이 최저 잔고금액 이상이면 매수
                     if __buy_total_prc > CONST_BUY_TOTAL_PRICE:
                         __is_buy = True
@@ -143,11 +143,6 @@ def process_condition_buy(token, conditions, holdings, buys, is_jump) :
                                     conditions.remove(c)
                                     # 매수종목 리스트에 추가
                                     buys.append(s)
-
-                                    time.sleep(1)
-
-                                    # 예수금 조회
-                                    __buy_total_prc = api.deposit(token)
 
                             elif int(s.price) > int(c.price) :
                                 c.price = s.price
