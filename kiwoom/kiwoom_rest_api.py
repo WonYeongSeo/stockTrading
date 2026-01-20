@@ -3,7 +3,7 @@ import time
 from kiwoom.stock import Contract, Holding, Stockinfo, TodayStock, TodayTotalEarnLoss
 from log import file_logging
 from helper import util
-from helper.constants import CONST_HOST
+from helper.constants import CONST_HOST, CONST_SELL_EXCLUDE_RATE
 
 cont_yn = 'N'
 next_key = ''
@@ -149,16 +149,15 @@ def get_flu_rt(token, code) :
 def set_open_pric(token, code) :
     return get_open_pric(token, code)
 
-# 상한가 여부
-def is_upl(token, code) :
-    __is_upl = False
+# 매도 제외 체크
+def is_sell(token, code) :
+    is_sell = True
     __stock = stock_info(token, code)
     if __stock :
-        __cur_prc = __stock.cur_prc
-        __upl_pric = __stock.upl_pric
-        if __cur_prc > 0 and __upl_pric > 0 and __cur_prc == __upl_pric :
-            __is_upl = True
-    return __is_upl
+        __flu_rt = __stock.__flu_rt
+        if __flu_rt > CONST_SELL_EXCLUDE_RATE :
+            is_sell = False
+    return is_sell
 
 # 주식 매수주문
 def buy(token, code, price, qty, is_jump) :
@@ -218,7 +217,7 @@ def get_today_trading_stocks(token, dt) :
     __api_id = 'ka10170'
     __data = {
 		'base_dt': dt, # 기준일자 YYYYMMDD(공백입력시 금일데이터,최근 2개월까지 제공)
-		'ottks_tp': '1', # 단주구분 1:당일매수에 대한 당일매도,2:당일매도 전체
+		'ottks_tp': '2', # 단주구분 1:당일매수에 대한 당일매도,2:당일매도 전체
 		'ch_crd_tp': '0', # 현금신용구분 0:전체, 1:현금매매만, 2:신용매매만
 	}
 

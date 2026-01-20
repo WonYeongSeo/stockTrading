@@ -4,10 +4,10 @@ from datetime import datetime
 from kiwoom import kiwoom_condition, kiwoom_rest_api as api
 from kiwoom.stock import stock_log
 from helper import util
-from helper.constants import CONST_BUY_TOTAL_PRICE, CONST_SELL_EARN_RATE, CONST_SELL_LOSS_RATE, CONST_SELL_CHECK_RATE, CONST_SELL_STOCK_FLU_RATE, CONST_JUMP_SLEEP_TIME
-from helper.constants import CONST_RISE_START_TIME, CONST_RISE_END_TIME, CONST_EXCEL_DB_TIME, CONST_RISE_SLEEP_TIME, CONST_RISE_BUY_DELAY_TIME, CONST_JUMP_START_TIME
+from helper.constants import CONST_BUY_TOTAL_PRICE, CONST_JUMP_START_TIME, CONST_JUMP_SLEEP_TIME
+from helper.constants import CONST_RISE_START_TIME, CONST_RISE_END_TIME, CONST_EXCEL_DB_TIME, CONST_RISE_SLEEP_TIME, CONST_RISE_BUY_DELAY_TIME
+from helper.constants import CONST_SELL_EARN_RATE, CONST_SELL_LOSS_RATE, CONST_SELL_CHECK_RATE, CONST_SELL_STOCK_FLU_RATE, CONST_SELL_EXCLUDE_RATE
 from log.file_logging import condition_logging, error_logging
-
 # ---------------------------------------------------------------------------------------------------------------------------------
 __today = util.today('%Y%m%d')
 
@@ -121,9 +121,9 @@ def process_condition_buy(token, conditions, holdings, buys, is_jump) :
 
                         # 이전 검색 금액보다 현재 검색 금액이 큰 경우 매수
                         if __is_buy and int(s.price) > int(c.price) : # and __high_check_price > s.h_price :
-                            time_second = util.get_diff_timesecond(datetime.now(), c.time)
+                            __time_second = util.get_diff_timesecond(datetime.now(), c.time)
 
-                            if is_jump or time_second > CONST_RISE_BUY_DELAY_TIME :
+                            if is_jump or __time_second > CONST_RISE_BUY_DELAY_TIME :
                                 if __buy_total_prc > CONST_BUY_TOTAL_PRICE :
                                     __buy_total_prc = CONST_BUY_TOTAL_PRICE
 
@@ -144,6 +144,8 @@ def process_condition_buy(token, conditions, holdings, buys, is_jump) :
                                     # 매수종목 리스트에 추가
                                     buys.append(s)
 
+                                elif int(s.price) > int(c.price) :
+                                    c.price = s.price
                             elif int(s.price) > int(c.price) :
                                 c.price = s.price
                         elif int(s.price) > int(c.price) :
@@ -174,13 +176,13 @@ def process_sell(token, today_holdings, is_jump) :
     try :
         if today_holdings :
             for t in today_holdings :
-                # 상한가이면 매도에서 제외
-                if not api.is_upl(token, t.code) :
+                __flu_rt = api.get_flu_rt(token, t.code) # 현재 등락률
+                # 매도 제외 체크
+                if __flu_rt < CONST_SELL_EXCLUDE_RATE :
                     __earn_rate = float(t.earn_rate)
 
                     # 장종반 전량 매도 / 수익률이 기준 수익률 이상 / 수익률이 기준 손절율 이하이면  매도
                     if __earn_rate > CONST_SELL_EARN_RATE or __earn_rate < CONST_SELL_LOSS_RATE :
-                        __flu_rt = api.get_flu_rt(token, t.code) # 현재 등락률
 
                         # 장중이면서 수익율이 check rate 이상 또는 25% 이상이면 매도 대기
                         if __earn_rate > CONST_SELL_CHECK_RATE or __flu_rt > CONST_SELL_STOCK_FLU_RATE:
@@ -203,8 +205,9 @@ def process_sell_all(token, today_holdings) :
     try :
         if today_holdings :
             for t in today_holdings :
-                # 상한가이면 매도에서 제외
-                if not api.is_upl(token, t.code) :
+                __flu_rt = api.get_flu_rt(token, t.code) # 현재 등락률
+                # 매도 제외 체크
+                if __flu_rt < CONST_SELL_EXCLUDE_RATE :
                     __earn_rate = float(t.earn_rate)
                     __sell_qty = int(t.qty)
                     stock_log(t.code, t.name, __earn_rate, __sell_qty, 'SELL', False, t.cur_prc, 0)

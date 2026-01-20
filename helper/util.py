@@ -83,4 +83,4 @@ def get_diff_time(today, buy_time, sell_time) :
 
 # 시간 차이
 def get_diff_timesecond(time1, time2) :
-    return (time1 - time2).total_seconds()
+    return int((time1 - time2).total_seconds())
