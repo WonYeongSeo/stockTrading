@@ -1,1 +1,2 @@
 python auto_trading_condition.py
+@pause

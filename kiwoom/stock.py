@@ -14,6 +14,7 @@ class Stock :
         self.time = datetime.now()
         self.cur_price = int(0)
         self.before_price = int(0)
+        self.flu_rt = float(0)
 
 class Holding :
     # stk_cd : 종목코드
@@ -117,25 +118,16 @@ class TodayTotalEarnLoss :
         self.tot_prft_rt = float(tot_prft_rt) if tot_prft_rt else 0
 
 # logging 처리
-def stock_log(code, name, price, qty, type, is_jump, cur_price, before_price) :
+def stock_log(code, name, price, qty, type, is_jump, cur_price, before_price, flu_rt, time) :
     try :
         __stock = Stock(code, name, price, qty)
         __stock.cur_price = cur_price
         __stock.before_price = before_price
+        __stock.flu_rt = flu_rt
+        __stock.time = time
 
         # 파일에 저장
         file_logging.trading_logging(__stock, type, is_jump, '')
 
     except Exception as e :
         file_logging.error_logging(' 매매 stock_log logging 중 에러 : ' + str(e))
-
-# logging 처리
-def stock_log_1(code, name, price, qty, type, is_jump) :
-    try :
-        __stock = Stock(code, name, price, qty)
-
-        # 파일에 저장
-        file_logging.trading_logging(__stock, type, is_jump, '')
-
-    except Exception as e :
-        file_logging.error_logging(' 매매 stock_log_1 logging 중 에러 : ' + str(e))

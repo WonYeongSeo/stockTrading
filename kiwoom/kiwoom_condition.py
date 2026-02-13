@@ -2,14 +2,13 @@ import asyncio
 import websockets
 import json
 from kiwoom.stock import Stock
-from helper.constants import CONST_SOCKET_URL, CONST_BUY_TOTAL_PRICE
-
-stocks = []
+from helper.constants import CONST_SOCKET_URL, CONST_BUY_TOTAL_AMOUNT
 
 class WebSocketClient:
-	def __init__(self, token):
+	def __init__(self, token, buy_total_amount):
 		self.uri = CONST_SOCKET_URL
 		self.token = token
+		self.buy_total_amount = int(buy_total_amount) if buy_total_amount else CONST_BUY_TOTAL_AMOUNT
 		self.websocket = None
 		self.connected = False
 		self.keep_running = True
@@ -45,7 +44,7 @@ class WebSocketClient:
 		await self.websocket.send(message)
 
 	# 서버에서 오는 메시지를 수신하여 출력합니다.
-	async def receive_messages(self):
+	async def receive_messages(self, temp_stocks):
 		while self.keep_running:
 			try:
 				# 서버로부터 수신한 메시지를 JSON 형식으로 파싱
@@ -71,14 +70,13 @@ class WebSocketClient:
 					reps = response.get('data')
 					if reps :
 						for r in reps :
-							if r.get('9001') and int(r.get('10')) <= CONST_BUY_TOTAL_PRICE :
+							if r.get('9001') and int(r.get('10')) <= int(self.buy_total_amount) :
 								__stock = Stock(r.get('9001'), r.get('302'), int(r.get('10')), 0)
 								__stock.before_rate = float(r.get('11')) # 전일대비
-								__stock.rate = float(r.get('12')) # 등락률
 								__stock.s_price = int(r.get('16')) # 시초가
 								__stock.h_price = int(r.get('17')) # 고가
 								__stock.l_price = int(r.get('18')) # 저가
-								stocks.append(__stock)
+								temp_stocks.append(__stock)
 
 					await self.disconnect()
 
@@ -87,9 +85,9 @@ class WebSocketClient:
 				self.connected = False
 				await self.websocket.close()
 	# WebSocket 실행
-	async def run(self):
+	async def run(self, temp_stocks):
 		await self.connect()
-		await self.receive_messages()
+		await self.receive_messages(temp_stocks)
 
 	# WebSocket 연결 종료
 	async def disconnect(self):
@@ -99,12 +97,12 @@ class WebSocketClient:
 			self.connected = False
 			# print('***** Disconnected from WebSocket server')
 
-async def main(token, seq):
+async def main(token, seq, buy_total_amount, temp_stocks):
 	# WebSocketClient 전역 변수 선언
-	websocket_client = WebSocketClient(token)
+	websocket_client = WebSocketClient(token, buy_total_amount)
 
 	# WebSocket 클라이언트를 백그라운드에서 실행합니다.
-	receive_task = asyncio.create_task(websocket_client.run())
+	receive_task = asyncio.create_task(websocket_client.run(temp_stocks))
 
 	# 실시간 항목 등록
 	await asyncio.sleep(1)
@@ -120,7 +118,7 @@ async def main(token, seq):
 	# 수신 작업이 종료될 때까지 대기
 	await receive_task
 
-def search(token, seq) :
-	asyncio.run(main(token, seq))
+def search(token, seq, buy_total_amount, temp_stocks) :
+	asyncio.run(main(token, seq, buy_total_amount, temp_stocks))
 
-	return stocks
+	return temp_stocks

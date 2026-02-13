@@ -15,11 +15,11 @@ def trading_logging(stock, type, is_jump, msg) :
         if 'BUY' == type :
             with open(__file_path, 'a', encoding='utf-8') as f :
                 f.write(__current_time + ' ** 매수 종목코드[' + stock.code  + '] 종목명[' + stock.name + '] 매수단가[' + str(stock.price) + '] 매수수량[' + str(stock.qty)
-                        + '] 현재단가[' + str(stock.cur_price)+ '] 이전단가[' + str(stock.before_price) + ']\n')
+                        + '] 현재단가[' + str(stock.cur_price) + '] 이전단가[' + str(stock.before_price) + '] 등락률[' + str(stock.flu_rt) + '] 검색시간[' + str(stock.time) + ']\n')
         else :
             with open(__file_path, 'a', encoding='utf-8') as f :
                 f.write(__current_time + ' ***** 매도 종목코드['+ stock.code + '] 종목명[' + stock.name + '] 수익률[' + str(stock.price)+ '] 현재단가[' + str(stock.cur_price)
-                        + '] 매도수량[' + str(stock.qty)  + ']\n')
+                        + '] 매도수량[' + str(stock.qty)  + '] 등락률[' + str(stock.flu_rt) + ']\n')
     else :
         with open(__file_path, 'a', encoding='utf-8') as f :
             f.write(__current_time + ' ### ' + msg + '\n')
@@ -46,10 +46,10 @@ def error_logging(msg) :
 
 def file_copy() :
     __current_time = strftime('%Y%m%d', localtime()) + "_"
-    shutil.copy2(CONST_FILE_JUMP_LOG, CONST_FILE_PATH_BACKUP + __current_time + CONST_FILE_NAME_JUMP_LOG + CONST_FILE_EXTENSION)
+    # shutil.copy2(CONST_FILE_JUMP_LOG, CONST_FILE_PATH_BACKUP + __current_time + CONST_FILE_NAME_JUMP_LOG + CONST_FILE_EXTENSION)
     shutil.copy2(CONST_FILE_JUMP_TRA_LOG, CONST_FILE_PATH_BACKUP + __current_time + CONST_FILE_NAME_JUMP_TRA_LOG + CONST_FILE_EXTENSION)
     shutil.copy2(CONST_FILE_RISE_LOG, CONST_FILE_PATH_BACKUP + __current_time + CONST_FILE_NAME_RISE_LOG + CONST_FILE_EXTENSION)
-    shutil.copy2(CONST_FILE_RISE_TRA_LOG, CONST_FILE_PATH_BACKUP + __current_time + CONST_FILE_NAME_RISE_TRA_LOG + CONST_FILE_EXTENSION)
+    # shutil.copy2(CONST_FILE_RISE_TRA_LOG, CONST_FILE_PATH_BACKUP + __current_time + CONST_FILE_NAME_RISE_TRA_LOG + CONST_FILE_EXTENSION)
 
 def log_truncate() :
     with open(CONST_FILE_JUMP_LOG, 'w') as f :

@@ -1,9 +1,9 @@
 import requests
-import time
 from kiwoom.stock import Contract, Holding, Stockinfo, TodayStock, TodayTotalEarnLoss
 from log import file_logging
 from helper import util
 from helper.constants import CONST_HOST, CONST_SELL_EXCLUDE_RATE
+import json
 
 cont_yn = 'N'
 next_key = ''
@@ -36,7 +36,7 @@ def deposit(token) :
     __end_point = '/api/dostk/acnt'
     __api_id = 'kt00001'
     __data = {
-        'qry_tp': '3',
+        'qry_tp': '3', #3:추정조회, 2:일반조회
     }
 
     __rep = get_response(token, __end_point, __api_id, __data, cont_yn, next_key)
@@ -160,7 +160,7 @@ def is_sell(token, code) :
     return is_sell
 
 # 주식 매수주문
-def buy(token, code, price, qty, is_jump) :
+def buy(token, code, name, price, qty, trde_tp, is_jump) :
     __end_point = '/api/dostk/ordr'
     __api_id = 'kt10000'
     __data =  {
@@ -168,7 +168,7 @@ def buy(token, code, price, qty, is_jump) :
 		'stk_cd': code, # 종목코드
 		'ord_qty': qty, # 주문수량
 		'ord_uv': price, # 주문단가
-		'trde_tp': '0', # 매매구분 0:보통 , 3:시장가 , 5:조건부지정가 , 81:장마감후시간외 , 61:장시작전시간외, 62:시간외단일가 , 6:최유리지정가 , 7:최우선지정가 , 10:보통(IOC) , 13:시장가(IOC) , 16:최유리(IOC) , 20:보통(FOK) , 23:시장가(FOK) , 26:최유리(FOK) , 28:스톱지정가,29:중간가,30:중간가(IOC),31:중간가(FOK)
+		'trde_tp': str(trde_tp), # 매매구분 0:보통 , 3:시장가 , 5:조건부지정가 , 81:장마감후시간외 , 61:장시작전시간외, 62:시간외단일가 , 6:최유리지정가 , 7:최우선지정가 , 10:보통(IOC) , 13:시장가(IOC) , 16:최유리(IOC) , 20:보통(FOK) , 23:시장가(FOK) , 26:최유리(FOK) , 28:스톱지정가,29:중간가,30:중간가(IOC),31:중간가(FOK)
 		'cond_uv': '', # 조건단가
 	}
 
@@ -181,12 +181,12 @@ def buy(token, code, price, qty, is_jump) :
             __flag = True
         else :
             # print('*** 매수 시 에러 발생 : ', datetime.now(), rep.json()['return_msg'])
-            file_logging.trading_logging('', 'BUY', is_jump, '매수 시 에러 발생 : ' + __rep.json()['return_msg'])
+            file_logging.trading_logging('', 'BUY', is_jump, '매수 시 에러 발생 : ' + code + '/' + name + '/' + __rep.json()['return_msg'])
 
     return __flag
 
 # 주식 매도주문
-def sell(token, code, qty, is_jump) :
+def sell(token, code, name, qty, is_jump) :
     __end_point = '/api/dostk/ordr'
     __api_id = 'kt10001'
     __data =  {
@@ -207,7 +207,7 @@ def sell(token, code, qty, is_jump) :
             __flag = True
         else :
             # print('*** 매도 시 에러 발생 : ', datetime.now(), rep.json()['return_msg'])
-            file_logging.trading_logging('', 'SELL', is_jump, '매도 시 에러 발생 : ' + __rep.json()['return_msg'])
+            file_logging.trading_logging('', 'SELL', is_jump, '매도 시 에러 발생 : ' + code + '/' + name + '/' + __rep.json()['return_msg'])
 
     return __flag
 
