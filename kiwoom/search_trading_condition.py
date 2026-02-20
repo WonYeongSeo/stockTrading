@@ -71,7 +71,7 @@ def auto_trading(token, old_holding_codes, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT)
                 process_buy_rise(token, conditions_rise, conditions_jump, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT)
 
                 # 3분봉기간상승 조건검색
-                process_condition_2(token, BUY_TOTAL_AMOUNT)
+                # process_condition_2(token, BUY_TOTAL_AMOUNT)
 
                 time.sleep(CONST_RISE_SLEEP_TIME)
 
@@ -334,8 +334,8 @@ def process_sell(token, today_holdings, is_jump) :
                                 api.sell(token, t.code, t.name, str(__sell_qty), is_jump)
 
                     else :
-                        # 수익률이 기준 수익률 이상 / 수익률이 기준 손절율 이하이면  매도
-                        if __earn_rate > CONST_SELL_EARNING_RATE or __earn_rate < CONST_SELL_LOSS_RISE_RATE :
+                        # 수익률이 기준 수익률 이상이면  매도
+                        if __earn_rate > CONST_SELL_EARNING_RATE  :
                             # 수익률이 check rate 이상 또는 25% 이상이면 매도 대기
                             if __earn_rate > CONST_SELL_STANDBY_EARNING_RATE or __flu_rt > CONST_SELL_STANDBY_FLU_RATE:
                                 continue
@@ -347,13 +347,17 @@ def process_sell(token, today_holdings, is_jump) :
                             if __sell_qty > 0 :
                                 api.sell(token, t.code, t.name, str(__sell_qty), is_jump)
                                 stock_log(t.code, t.name, __earn_rate, __sell_qty, 'SELL', is_jump, t.cur_prc, 0, __flu_rt, '')
-
-            time.sleep(0.1)
+                        # 수익률이 기준 손절율 이하이면 추가매수
+                        elif __earn_rate < CONST_SELL_LOSS_RISE_RATE :
+                            __buyprice = int(t.cur_prc)
+                            __buy_qty = int(t.qty)
+                            stock_log(t.code, t.name, __buyprice, __buy_qty, 'BUY', False, __buyprice, __buyprice, __flu_rt, datetime.now())
+                            # 매수 호출
+                            api.buy(token, t.code, t.name, str(__buyprice), str(__buy_qty), '0', False)
 
     except Exception as e :
         print(f'### 당일매수종목 매도 중 에러발생!! : {e}')
         error_logging(' 당일매수종목 매도 중 에러 : ' + str(e))
-
 
 # 당일매수종목에 대한 전량 매도 -----------------------------------------------------------------------------------------------------------------------------
 def process_sell_all(token, today_holdings) :

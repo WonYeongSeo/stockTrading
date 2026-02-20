@@ -18,12 +18,13 @@ from helper.constants import CONST_START_TIME, CONST_DEPOSIT_MINIMUM_AMOUNT, CON
 # v2.2 : 실행 시 입력값 기능 추가
 # v2.3 : 1분급등조건(급등주)과 3분급등조건(상승주) 매수 함수 분리
 # v2.4 : 1분급등조건(급등주) 매매 삭제
+# v2.5 : 추가매수 기능 추가
 #======================================================================================================
 
 # 예수금 최저 잔고금액 입력받기 - 입력값 없으면 constants 정의된 값으로 진행
-DEPOSIT_MIN_AMOUNT = input('예수금 최저 잔고금액을 입력하세요 (입력하지 않으면 ' + str(CONST_DEPOSIT_MINIMUM_AMOUNT) + '원 적용) : ')
+DEPOSIT_MIN_AMOUNT = input('예수금 최저 잔고금액을 입력하세요 (입력하지 않으면 ' + str(f"{CONST_DEPOSIT_MINIMUM_AMOUNT: ,}") + '원 적용) : ')
 # 종목당 매수할 금액 입력받기 - 입력값 없으면 constants 정의된 값으로 진행
-BUY_TOTAL_AMOUNT = input('종목당 매수할 금액을 입력하세요 (입력하지 않으면 ' + str(CONST_BUY_TOTAL_AMOUNT) + '원 적용) : ')
+BUY_TOTAL_AMOUNT = input('종목당 매수할 금액을 입력하세요 (입력하지 않으면 ' + str(f"{CONST_BUY_TOTAL_AMOUNT: ,}") + '원 적용) : ')
 
 # 접근토큰
 token = kiwoom_token.get_token()

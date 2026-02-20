@@ -13,9 +13,16 @@ def trading_logging(stock, type, is_jump, msg) :
 
     if stock :
         if 'BUY' == type :
-            with open(__file_path, 'a', encoding='utf-8') as f :
-                f.write(__current_time + ' ** 매수 종목코드[' + stock.code  + '] 종목명[' + stock.name + '] 매수단가[' + str(stock.price) + '] 매수수량[' + str(stock.qty)
-                        + '] 현재단가[' + str(stock.cur_price) + '] 이전단가[' + str(stock.before_price) + '] 등락률[' + str(stock.flu_rt) + '] 검색시간[' + str(stock.time) + ']\n')
+            __flu_rt = float(stock.flu_rt)
+
+            if __flu_rt < 0 :
+                with open(__file_path, 'a', encoding='utf-8') as f :
+                    f.write(__current_time + ' ** 추가 매수 종목코드[' + stock.code  + '] 종목명[' + stock.name + '] 매수단가[' + str(stock.price) + '] 매수수량[' + str(stock.qty)
+                            + '] 등락률[' + str(stock.flu_rt) + '] 매수시간[' + str(stock.time) + ']\n')
+            else :
+                with open(__file_path, 'a', encoding='utf-8') as f :
+                    f.write(__current_time + ' ** 매수 종목코드[' + stock.code  + '] 종목명[' + stock.name + '] 매수단가[' + str(stock.price) + '] 매수수량[' + str(stock.qty)
+                            + '] 현재단가[' + str(stock.cur_price) + '] 이전단가[' + str(stock.before_price) + '] 등락률[' + str(stock.flu_rt) + '] 검색시간[' + str(stock.time) + ']\n')
         else :
             with open(__file_path, 'a', encoding='utf-8') as f :
                 f.write(__current_time + ' ***** 매도 종목코드['+ stock.code + '] 종목명[' + stock.name + '] 수익률[' + str(stock.price)+ '] 현재단가[' + str(stock.cur_price)
@@ -47,7 +54,7 @@ def error_logging(msg) :
 def file_copy() :
     __current_time = strftime('%Y%m%d', localtime()) + "_"
     # shutil.copy2(CONST_FILE_JUMP_LOG, CONST_FILE_PATH_BACKUP + __current_time + CONST_FILE_NAME_JUMP_LOG + CONST_FILE_EXTENSION)
-    shutil.copy2(CONST_FILE_JUMP_TRA_LOG, CONST_FILE_PATH_BACKUP + __current_time + CONST_FILE_NAME_JUMP_TRA_LOG + CONST_FILE_EXTENSION)
+    # shutil.copy2(CONST_FILE_JUMP_TRA_LOG, CONST_FILE_PATH_BACKUP + __current_time + CONST_FILE_NAME_JUMP_TRA_LOG + CONST_FILE_EXTENSION)
     shutil.copy2(CONST_FILE_RISE_LOG, CONST_FILE_PATH_BACKUP + __current_time + CONST_FILE_NAME_RISE_LOG + CONST_FILE_EXTENSION)
     # shutil.copy2(CONST_FILE_RISE_TRA_LOG, CONST_FILE_PATH_BACKUP + __current_time + CONST_FILE_NAME_RISE_TRA_LOG + CONST_FILE_EXTENSION)
 
