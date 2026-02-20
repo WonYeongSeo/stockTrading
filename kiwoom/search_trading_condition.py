@@ -331,7 +331,7 @@ def process_sell(token, today_holdings, is_jump) :
 
                             if __sell_qty > 0 :
                                 api.sell(token, t.code, t.name, str(__sell_qty), is_jump)
-                                stock_log(t.code, t.name, 0, __sell_qty, 'SELL', is_jump, t.cur_prc, __earn_rate, __flu_rt, '')
+                                stock_log(t.code, t.name, 0, __sell_qty, 'SELL', is_jump, t.cur_prc, 0, __earn_rate, __flu_rt, '')
 
                     else :
                         # 수익률이 기준 수익률 이상이면  매도
@@ -349,9 +349,10 @@ def process_sell(token, today_holdings, is_jump) :
                                 stock_log(t.code, t.name, 0, __sell_qty, 'SELL', is_jump, t.cur_prc, 0, __earn_rate, __flu_rt, '')
                         # 수익률이 기준 손절율 이하이면 추가매수
                         elif __earn_rate < CONST_SELL_LOSS_RISE_RATE :
-                            __buyprice = int(t.cur_prc)
+                            # 매수할 단가 구하기
+                            __buyprice = util.get_buy_price(t.cur_prc, False)
                             __buy_qty = int(t.qty)
-                            stock_log(t.code, t.name, __buyprice, __buy_qty, 'BUY', False, 0, 0, __earn_rate, __flu_rt, '')
+                            stock_log(t.code, t.name, __buyprice, __buy_qty, 'BUY', False, t.cur_prc, 0, __earn_rate, __flu_rt, '')
                             # 매수 호출
                             api.buy(token, t.code, t.name, str(__buyprice), str(__buy_qty), '0', False)
 

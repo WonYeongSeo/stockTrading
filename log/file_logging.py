@@ -18,7 +18,7 @@ def trading_logging(stock, type, is_jump, msg) :
             if __earn_rate < 0 :
                 with open(__file_path, 'a', encoding='utf-8') as f :
                     f.write(__current_time + ' ---> 추가 매수 종목코드[' + stock.code  + '] 종목명[' + stock.name + '] 매수단가[' + str(stock.price) + '] 매수수량[' + str(stock.qty)
-                            + '] 수익률[' + str(stock.earn_rate) + '] 등락률[' + str(stock.flu_rt) + ']\n')
+                            + '] 현재단가[' + str(stock.cur_price) + '] 수익률[' + str(stock.earn_rate) + '] 등락률[' + str(stock.flu_rt) + ']\n')
             else :
                 with open(__file_path, 'a', encoding='utf-8') as f :
                     f.write(__current_time + ' --> 매수 종목코드[' + stock.code  + '] 종목명[' + stock.name + '] 매수단가[' + str(stock.price) + '] 매수수량[' + str(stock.qty)
