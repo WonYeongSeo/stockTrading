@@ -15,6 +15,7 @@ class Stock :
         self.cur_price = int(0)
         self.before_price = int(0)
         self.flu_rt = float(0)
+        self.earn_rate = float(0)
 
 class Holding :
     # stk_cd : 종목코드
@@ -118,11 +119,12 @@ class TodayTotalEarnLoss :
         self.tot_prft_rt = float(tot_prft_rt) if tot_prft_rt else 0
 
 # logging 처리
-def stock_log(code, name, price, qty, type, is_jump, cur_price, before_price, flu_rt, time) :
+def stock_log(code, name, price, qty, type, is_jump, cur_price, before_price, earn_rate, flu_rt, time) :
     try :
         __stock = Stock(code, name, price, qty)
         __stock.cur_price = cur_price
         __stock.before_price = before_price
+        __stock.earn_rate = earn_rate
         __stock.flu_rt = flu_rt
         __stock.time = time
 
