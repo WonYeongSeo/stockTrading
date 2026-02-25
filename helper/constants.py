@@ -10,24 +10,24 @@ CONST_CONDITIN_HIGH_DIFF_RATE = float(0.07) # 고가 대비 차이율
 CONST_SELL_EXCLUDE_RATE = float(29) # 종목등락률 이상이면 매도 제외
 CONST_SELL_STANDBY_FLU_RATE = float(27) # 종목등락률 이상이면 매도 대기
 CONST_SELL_STANDBY_EARNING_RATE = float(10) # 수익률 이상이면 매도 대기
-CONST_SELL_EARNING_RATE = float(5) # 매도 수익률
-CONST_SELL_LOSS_JUMP_RATE = float(-3) # 급등주 매도 손절율
-CONST_SELL_LOSS_RISE_RATE = float(-5) # 상승주 매도 손절율
+CONST_SELL_EARNING_RATE = float(7) # 매도 수익률
+CONST_SELL_LOSS_JUMP_RATE = float(-4) # 급등주 매도 손절율
+CONST_SELL_LOSS_RISE_RATE = float(-3) # 상승주 매도 손절율
 CONST_BUY_JUMP_PRICE_RATE = float(0.02) # 급등주 매수주문 시 매수단가 호가율
 CONST_BUY_RISE_PRICE_RATE = float(0.01) # 상승주 매수주문 시 매수단가 호가율
 CONST_SELL_EXCLUDE_AMOUNT = int(str('1,500,000').replace(',','')) # 매도 시 기준금액이상이면 제외
-CONST_BUY_TOTAL_AMOUNT = int(str('500,000').replace(',','')) # 종목당 매수할 금액
-CONST_DEPOSIT_MINIMUM_AMOUNT = int(str('10,000').replace(',','')) # 예수금 최저 잔고 금액
-CONST_START_TIME = datetime(datetime.now().year, datetime.now().month, datetime.now().day, 9, 19, 50) # 시작 시간
+CONST_BUY_TOTAL_AMOUNT = int(str('300,000').replace(',','')) # 종목당 매수할 금액
+CONST_DEPOSIT_MINIMUM_AMOUNT = int(str('900,000').replace(',','')) # 예수금 최저 잔고 금액
+CONST_START_TIME = datetime(datetime.now().year, datetime.now().month, datetime.now().day, 9, 7, 30) # 시작 시간
 
 # 급등주
 CONST_JUMP_SLEEP_TIME = int(55) # 급등주 수행주기
 CONST_JUMP_START_TIME = datetime(datetime.now().year, datetime.now().month, datetime.now().day, 9, 3, 0) # 급등주 시작 시간
 
 # 상승주
-CONST_RISE_SLEEP_TIME = int(54) # 상승주 수행주기
-CONST_RISE_BUY_DELAY_TIME = int(20*60) # 상승주 매수 대기 시간
-CONST_RISE_START_TIME = datetime(datetime.now().year, datetime.now().month, datetime.now().day, 9, 19, 0) # 상승주 시작 시간
+CONST_RISE_SLEEP_TIME = int(51) # 상승주 수행주기
+CONST_RISE_BUY_DELAY_TIME = int(30*60) # 상승주 매수 대기 시간
+CONST_RISE_START_TIME = datetime(datetime.now().year, datetime.now().month, datetime.now().day, 9, 7, 0) # 상승주 시작 시간
 CONST_RISE_END_TIME = datetime(datetime.now().year, datetime.now().month, datetime.now().day, 15, 12, 0) # 상승주 종료 시간
 CONST_EXCEL_DB_TIME = datetime(datetime.now().year, datetime.now().month, datetime.now().day, 15, 40, 0) # excel logging / database save 시간
 

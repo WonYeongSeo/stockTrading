@@ -31,11 +31,12 @@ token = kiwoom_token.get_token()
 
 # 장 시작 시간 체크
 if datetime.now() < CONST_START_TIME :
+    # log 파일 초기화
+    file_logging.log_truncate()
+
     __delay_time = CONST_START_TIME - datetime.now()
     print(f'### {__delay_time} 후에 자동매매 시작!!')
     time.sleep(int(__delay_time.total_seconds()))
-    # log 파일 초기화
-    file_logging.log_truncate()
 
     # 접근토큰
     token = kiwoom_token.get_token()
