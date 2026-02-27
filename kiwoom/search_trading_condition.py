@@ -91,7 +91,7 @@ def process_buy_rise(token, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT
                 # 오늘 매수했던 종목은 제외
                 __today_buys = []
                 if buys :
-                    __today_buys = list(filter(lambda x: x.code == s.code, buys))
+                    __today_buys = list(filter(lambda x: x == s.code, buys))
 
                 if __already_holding or __today_buys:
                     continue
@@ -119,7 +119,7 @@ def process_buy_rise(token, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT
 
                             if __buy_flag :
                                 # 매수종목 리스트에 추가
-                                buys.append(s)
+                                buys.append(s.code)
 
             try :
                 # 파일에 저장
@@ -149,7 +149,7 @@ def process_sell(token, today_holdings, sell_standbys) :
                     # 이익보존 체크
                     __today_sell_standby = []
                     if sell_standbys :
-                        __today_sell_standby = list(filter(lambda x: x.code == t.code, sell_standbys))
+                        __today_sell_standby = list(filter(lambda x: x == t.code, sell_standbys))
 
                     # 이익보존대상이면서 기준 수익률 미만이면 매도
                     if __today_sell_standby :
