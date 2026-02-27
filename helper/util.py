@@ -1,6 +1,6 @@
 import math
 from datetime import date, datetime, timedelta
-from helper.constants import CONST_BUY_JUMP_PRICE_RATE, CONST_BUY_RISE_PRICE_RATE, CONST_SELL_EXCLUDE_AMOUNT, CONST_CONDITIN_HIGH_DIFF_RATE
+from helper.constants import CONST_BUY_RISE_PRICE_RATE, CONST_SELL_EXCLUDE_AMOUNT
 
 # 오늘날짜 가져오기
 def today(format) :
@@ -25,11 +25,8 @@ def convert_bid_unit(price) :
     return int(math.ceil(price / __bid_unit) * __bid_unit)
 
 # 매수 호가금액 구하기
-def get_buy_price(price, is_jump) :
-    if is_jump :
-        return convert_bid_unit(int(price) + int(int(price) * CONST_BUY_JUMP_PRICE_RATE))
-    else :
-        return convert_bid_unit(int(price) + int(int(price) * CONST_BUY_RISE_PRICE_RATE))
+def get_buy_price(price) :
+    return convert_bid_unit(int(price) + int(int(price) * CONST_BUY_RISE_PRICE_RATE))
 
 # 당일 매수해서 보유한 종목만 추출
 def today_holdings(old_holding_codes, holdings) :
@@ -48,9 +45,6 @@ def check_buy(current_price, price) :
     if current_price > price and current_price < int(price + int(price * 0.03)):
         __is_buy_price = True
     return __is_buy_price
-
-def get_high_check_price(price) :
-    return (int(price) + int(int(price) * CONST_CONDITIN_HIGH_DIFF_RATE))
 
 # 매수 시간 추출
 def get_buy_time(contract) :

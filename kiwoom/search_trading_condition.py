@@ -5,10 +5,8 @@ from kiwoom import kiwoom_condition, kiwoom_rest_api as api
 from kiwoom.stock import stock_log
 from helper import util
 from helper.constants import CONST_BUY_TOTAL_AMOUNT, CONST_DEPOSIT_MINIMUM_AMOUNT, CONST_EXCEL_DB_TIME
-from helper.constants import CONST_JUMP_START_TIME, CONST_JUMP_SLEEP_TIME
-from helper.constants import CONST_RISE_START_TIME, CONST_RISE_END_TIME, CONST_RISE_SLEEP_TIME, CONST_RISE_BUY_DELAY_TIME
-from helper.constants import CONST_SELL_LOSS_JUMP_RATE, CONST_SELL_LOSS_RISE_RATE
-from helper.constants import CONST_SELL_EARNING_RATE, CONST_SELL_STANDBY_EARNING_RATE, CONST_SELL_STANDBY_FLU_RATE, CONST_SELL_EXCLUDE_RATE
+from helper.constants import CONST_RISE_START_TIME, CONST_RISE_END_TIME, CONST_RISE_SLEEP_TIME
+from helper.constants import CONST_SELL_LOSS_RISE_RATE, CONST_SELL_EARNING_RATE, CONST_SELL_EXCLUDE_RATE
 from log.file_logging import condition_logging, error_logging
 # ---------------------------------------------------------------------------------------------------------------------------------
 __today = util.today('%Y%m%d')
@@ -31,7 +29,7 @@ def auto_trading(token, old_holding_codes, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT)
 
     # 매수종목 리스트
     buys = []
-    add_buys = []
+    sell_standbys = []
 
     is_excel_db_logging = False
 
@@ -62,7 +60,7 @@ def auto_trading(token, old_holding_codes, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT)
             # 상승주 매매
             elif datetime.now() > CONST_RISE_START_TIME :
                 # 당일 매수한 종목에 대한 매도처리
-                process_sell(token, today_holdings, add_buys, False)
+                process_sell(token, today_holdings, sell_standbys)
 
                 # 검색한 종목에 대한 매수처리
                 process_buy_rise(token, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT)
@@ -107,7 +105,7 @@ def process_buy_rise(token, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT
                         __buy_total_prc = BUY_TOTAL_AMOUNT
 
                     # 매수할 단가 구하기
-                    __buyprice = util.get_buy_price(s.price, False)
+                    __buyprice = util.get_buy_price(s.price)
 
                     # 종목당 매수할 총 금액이 매수금액보다 큰 경우에만 매수 호출
                     if __buy_total_prc > __buyprice :
@@ -115,7 +113,7 @@ def process_buy_rise(token, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT
 
                         if __buy_qty > 0 :
                             __flu_rt = api.get_flu_rt(token, s.code)
-                            stock_log(s.code, s.name, __buyprice, __buy_qty, 'BUY', False, s.price, 0, 0, __flu_rt, datetime.now())
+                            stock_log(s.code, s.name, __buyprice, __buy_qty, 'BUY', s.price, 0, 0, __flu_rt, datetime.now())
                             # 매수 호출
                             __buy_flag = api.buy(token, s.code, s.name, str(__buyprice), str(__buy_qty), '0', False)
 
@@ -136,65 +134,45 @@ def process_buy_rise(token, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT
         error_logging(' 상승주 매수 중 에러 : ' + str(e))
 
 # 당일매수종목에 대한 매도 -----------------------------------------------------------------------------------------------------------------------------
-def process_sell(token, today_holdings, add_buys, is_jump) :
+def process_sell(token, today_holdings, sell_standbys) :
     try :
         if today_holdings :
             for t in today_holdings :
-                __flu_rt = api.get_flu_rt(token, t.code) # 현재 등락률
+                # 현재 등락률
+                __flu_rt = api.get_flu_rt(token, t.code)
                 # 매도 제외 체크
                 if __flu_rt < CONST_SELL_EXCLUDE_RATE :
                     __earn_rate = float(t.earn_rate)
 
-                    if is_jump :
-                        # 수익률이 기준 손절율 이하이면  매도
-                        if __earn_rate < CONST_SELL_LOSS_JUMP_RATE :
-                            __sell_qty = int(t.qty)
+                    __is_sell = False
 
-                            if __sell_qty > 0 :
-                                api.sell(token, t.code, t.name, str(__sell_qty), is_jump)
-                                stock_log(t.code, t.name, 0, __sell_qty, 'SELL', is_jump, t.cur_prc, 0, __earn_rate, __flu_rt, '')
+                    # 이익보존 체크
+                    __today_sell_standby = []
+                    if sell_standbys :
+                        __today_sell_standby = list(filter(lambda x: x.code == t.code, sell_standbys))
 
+                    # 이익보존대상이면서 기준 수익률 미만이면 매도
+                    if __today_sell_standby :
+                        if __earn_rate < CONST_SELL_EARNING_RATE :
+                            __is_sell = True
+                            sell_standbys.remove(t.code)
+                        else :
+                            continue
                     else :
-                        # 수익률이 기준 수익률 이상이면  매도
+                        # 수익률이 기준 수익률 이상이면 이익보존 대상
                         if __earn_rate > CONST_SELL_EARNING_RATE  :
-                            # 수익률이 check rate 이상 또는 27% 이상이면 매도 대기
-                            if __earn_rate > CONST_SELL_STANDBY_EARNING_RATE or __flu_rt > CONST_SELL_STANDBY_FLU_RATE:
-                                continue
-
-                            __sell_qty = int(t.qty)
-
-                            if __sell_qty > 0 :
-                                api.sell(token, t.code, t.name, str(__sell_qty), is_jump)
-                                stock_log(t.code, t.name, 0, __sell_qty, 'SELL', is_jump, t.cur_prc, 0, __earn_rate, __flu_rt, '')
-                        # 수익률이 기준 손절율 이하이면 추가매수 / 추가매수한 종목이면 매도
+                            sell_standbys.append(t.code)
+                            continue
+                        # 수익률이 기준 손절율 이하이면 매도
                         elif __earn_rate < CONST_SELL_LOSS_RISE_RATE :
-                            __today_add_buys = []
-                            if add_buys :
-                                __today_add_buys = list(filter(lambda x: x.code == t.code, add_buys))
+                            __is_sell = True
 
-                            if __today_add_buys :
-                                __sell_qty = int(t.qty)
+                    if __is_sell :
+                        __sell_qty = int(t.qty)
 
-                                if __sell_qty > 0 :
-                                    api.sell(token, t.code, t.name, str(__sell_qty), is_jump)
-                                    stock_log(t.code, t.name, 0, __sell_qty, 'SELL', is_jump, t.cur_prc, 0, __earn_rate, __flu_rt, '')
-                            else :
-                                # 예수금 조회
-                                __buy_total_prc = api.deposit(token)
-
-                                # 매수할 단가 구하기
-                                __buyprice = util.get_buy_price(t.cur_prc, False)
-                                __buy_qty = int(t.qty)
-                                if __buy_total_prc < (__buyprice * __buy_qty) :
-                                    __buy_qty = int(__buy_total_prc / __buyprice)
-
-                                if __buy_qty > 0 :
-                                    stock_log(t.code, t.name, __buyprice, __buy_qty, 'BUY', False, t.cur_prc, 0, __earn_rate, __flu_rt, '')
-                                    # 매수 호출
-                                    __add_buy_flag = api.buy(token, t.code, t.name, str(__buyprice), str(__buy_qty), '0', False)
-
-                                    if __add_buy_flag :
-                                        add_buys.append(t)
+                        if __sell_qty > 0 :
+                            api.sell(token, t.code, t.name, str(__sell_qty))
+                            stock_log(t.code, t.name, 0, __sell_qty, 'SELL', t.cur_prc, 0, __earn_rate, __flu_rt, '')
 
     except Exception as e :
         print(f'### 당일매수종목 매도 중 에러발생!! : {e}')
@@ -212,7 +190,7 @@ def process_sell_all(token, today_holdings) :
                     __sell_qty = int(t.qty)
 
                     if __sell_qty > 0 :
-                        stock_log(t.code, t.name, 0, __sell_qty, 'SELL', False, t.cur_prc, 0, __earn_rate, __flu_rt, '')
+                        stock_log(t.code, t.name, 0, __sell_qty, 'SELL', t.cur_prc, 0, __earn_rate, __flu_rt, '')
                         api.sell(token, t.code, t.name, str(__sell_qty), False)
 
                 time.sleep(0.5)

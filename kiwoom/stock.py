@@ -27,7 +27,6 @@ class Holding :
     # evltv_prft : 평가손익
     # evlt_amt : 평가금액
     # buy_amount : 매입금액
-    # s_price : 시초가
     def __init__(self, code, name, cur_prc, buy_uv, qty, earn_rate, evltv_prft, evlt_amt) :
         self.code = code.replace('A', '').replace('*','')
         self.name = name
@@ -38,7 +37,6 @@ class Holding :
         self.evltv_prft = int(evltv_prft) if evltv_prft else 0
         self.evlt_amt = int(evlt_amt) if evlt_amt else 0
         self.buy_amount = self.buy_uv * self.qty
-        self.s_price = 0
 
 class Stockinfo :
     # stk_cd : 종목코드
@@ -119,7 +117,7 @@ class TodayTotalEarnLoss :
         self.tot_prft_rt = float(tot_prft_rt) if tot_prft_rt else 0
 
 # logging 처리
-def stock_log(code, name, price, qty, type, is_jump, cur_price, before_price, earn_rate, flu_rt, time) :
+def stock_log(code, name, price, qty, type, cur_price, before_price, earn_rate, flu_rt, time) :
     try :
         __stock = Stock(code, name, price, qty)
         __stock.cur_price = cur_price
@@ -129,7 +127,7 @@ def stock_log(code, name, price, qty, type, is_jump, cur_price, before_price, ea
         __stock.time = time
 
         # 파일에 저장
-        file_logging.trading_logging(__stock, type, is_jump, '')
+        file_logging.trading_logging(__stock, type, '')
 
     except Exception as e :
         file_logging.error_logging(' 매매 stock_log logging 중 에러 : ' + str(e))

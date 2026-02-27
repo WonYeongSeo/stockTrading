@@ -66,8 +66,6 @@ def stock_holdings(token, dt) :
     # prft_rt : 수익률
     # evltv_prft : 평가손익
     # evlt_amt : 평가금액
-    # s_price : 시초가
-
     __holdings = []
     if __rep :
         __stocks = __rep.json()['day_bal_rt']
@@ -160,7 +158,7 @@ def is_sell(token, code) :
     return is_sell
 
 # 주식 매수주문
-def buy(token, code, name, price, qty, trde_tp, is_jump) :
+def buy(token, code, name, price, qty, trde_tp) :
     __end_point = '/api/dostk/ordr'
     __api_id = 'kt10000'
     __data =  {
@@ -181,12 +179,12 @@ def buy(token, code, name, price, qty, trde_tp, is_jump) :
             __flag = True
         else :
             # print('*** 매수 시 에러 발생 : ', datetime.now(), rep.json()['return_msg'])
-            file_logging.trading_logging('', 'BUY', is_jump, '매수 시 에러 발생 : ' + code + '/' + name + '/' + __rep.json()['return_msg'])
+            file_logging.trading_logging('', 'BUY', '매수 시 에러 발생 : ' + code + '/' + name + '/' + __rep.json()['return_msg'])
 
     return __flag
 
 # 주식 매도주문
-def sell(token, code, name, qty, is_jump) :
+def sell(token, code, name, qty) :
     __end_point = '/api/dostk/ordr'
     __api_id = 'kt10001'
     __data =  {
@@ -207,7 +205,7 @@ def sell(token, code, name, qty, is_jump) :
             __flag = True
         else :
             # print('*** 매도 시 에러 발생 : ', datetime.now(), rep.json()['return_msg'])
-            file_logging.trading_logging('', 'SELL', is_jump, '매도 시 에러 발생 : ' + code + '/' + name + '/' + __rep.json()['return_msg'])
+            file_logging.trading_logging('', 'SELL', '매도 시 에러 발생 : ' + code + '/' + name + '/' + __rep.json()['return_msg'])
 
     return __flag
 
