@@ -113,9 +113,9 @@ def process_buy_rise(token, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT
 
                         if __buy_qty > 0 :
                             __flu_rt = api.get_flu_rt(token, s.code)
-                            stock_log(s.code, s.name, __buyprice, __buy_qty, 'BUY', s.price, 0, 0, __flu_rt, datetime.now())
+                            stock_log(s.code, s.name, __buyprice, __buy_qty, 'BUY', s.price, 0, 0, __flu_rt, s.time)
                             # 매수 호출
-                            __buy_flag = api.buy(token, s.code, s.name, str(__buyprice), str(__buy_qty), '0', False)
+                            __buy_flag = api.buy(token, s.code, s.name, str(__buyprice), str(__buy_qty), '0')
 
                             if __buy_flag :
                                 # 매수종목 리스트에 추가
@@ -123,7 +123,7 @@ def process_buy_rise(token, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT
 
             try :
                 # 파일에 저장
-                condition_logging(False, ' 검색종목 ' +  str(list(map(lambda x : str(x.code) + '/' + str(x.name) + '/' + str(x.price), __stocks))))
+                condition_logging(' 검색종목 ' +  str(list(map(lambda x : str(x.code) + '/' + str(x.name) + '/' + str(x.price), __stocks))))
 
             except Exception as e :
                 print(f'### 상승주 조건검색 파일 저장 중 에러발생!! : {e}')
@@ -191,7 +191,7 @@ def process_sell_all(token, today_holdings) :
 
                     if __sell_qty > 0 :
                         stock_log(t.code, t.name, 0, __sell_qty, 'SELL', t.cur_prc, 0, __earn_rate, __flu_rt, '')
-                        api.sell(token, t.code, t.name, str(__sell_qty), False)
+                        api.sell(token, t.code, t.name, str(__sell_qty))
 
                 time.sleep(0.5)
 
