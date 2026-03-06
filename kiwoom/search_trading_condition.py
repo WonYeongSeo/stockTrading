@@ -7,7 +7,7 @@ from helper import util
 from helper.constants import CONST_BUY_TOTAL_AMOUNT, CONST_DEPOSIT_MINIMUM_AMOUNT, CONST_EXCEL_DB_TIME
 from helper.constants import CONST_RISE_START_TIME, CONST_RISE_END_TIME, CONST_RISE_SLEEP_TIME
 from helper.constants import CONST_SELL_LOSS_RISE_RATE, CONST_SELL_EARNING_RATE, CONST_SELL_EXCLUDE_RATE
-from log.file_logging import condition_logging, error_logging
+from log.file_logging import condition_logging, error_logging, analysis_logging
 # ---------------------------------------------------------------------------------------------------------------------------------
 __today = util.today('%Y%m%d')
 
@@ -65,6 +65,9 @@ def auto_trading(token, old_holding_codes, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT)
                 # 검색한 종목에 대한 매수처리
                 process_buy_rise(token, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT)
 
+                # 분석용 검색 -------------------------------------------------------------------------------------------------------
+                process_analysis(token, BUY_TOTAL_AMOUNT)
+
                 time.sleep(CONST_RISE_SLEEP_TIME)
 
         except Exception as e :
@@ -77,7 +80,7 @@ def auto_trading(token, old_holding_codes, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT)
 # 상승주 조건검색된 종목 중 매수조건에 해당되면 매수 -------------------------------------------------------------------------------------------------------
 def process_buy_rise(token, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT) :
     try :
-        __seq = '0' # 3분급등조건
+        __seq = '0' # 3분하락후반등
         __temp_stocks = []
         __stocks = kiwoom_condition.search(token, __seq, BUY_TOTAL_AMOUNT, __temp_stocks)
 
@@ -125,9 +128,9 @@ def process_buy_rise(token, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT
                 # 파일에 저장
                 condition_logging(' 검색종목 ' +  str(list(map(lambda x : str(x.code) + '/' + str(x.name) + '/' + str(x.price), __stocks))))
 
-            except Exception as e :
-                print(f'### 상승주 조건검색 파일 저장 중 에러발생!! : {e}')
-                error_logging(' 상승주 조건검색 파일 저장 중 에러 : ' + str(e))
+            except Exception as fe :
+                print(f'### 상승주 조건검색 파일 저장 중 에러발생!! : {fe}')
+                error_logging(' 상승주 조건검색 파일 저장 중 에러 : ' + str(fe))
 
     except Exception as e :
         print(f'### 상승주 매수 중 에러발생!! : {e}')
@@ -153,7 +156,7 @@ def process_sell(token, today_holdings, sell_standbys) :
 
                     # 이익보존대상이면서 기준 수익률 미만이면 매도
                     if __today_sell_standby :
-                        if __earn_rate < CONST_SELL_EARNING_RATE :
+                        if __earn_rate < float(CONST_SELL_EARNING_RATE + 2) :
                             __is_sell = True
                             sell_standbys.remove(t.code)
                         else :
@@ -198,3 +201,24 @@ def process_sell_all(token, today_holdings) :
     except Exception as e :
         print(f'### 당일매수종목 전량 매도 중 에러발생!! : {e}')
         error_logging(' 당일매수종목 전량 매도 중 에러 : ' + str(e))
+
+
+# 분석용 검색 -------------------------------------------------------------------------------------------------------
+def process_analysis(token, BUY_TOTAL_AMOUNT) :
+    try :
+        __seq_analysis = '1' # 분석용
+        __temp_stocks = []
+        __analysis = kiwoom_condition.search(token, __seq_analysis, BUY_TOTAL_AMOUNT, __temp_stocks)
+
+        try :
+            if __analysis :
+                # 파일에 저장
+                analysis_logging(' 검색종목 ' +  str(list(map(lambda x : str(x.code) + '/' + str(x.name) + '/' + str(x.price), __analysis))))
+
+        except Exception as fe :
+            print(f'### 분석용 검색 파일 저장 중 에러발생!! : {fe}')
+            error_logging(' 분석용 검색 파일 저장 중 에러 : ' + str(fe))
+
+    except Exception as e :
+        print(f'### 분석용 검색 중 에러발생!! : {e}')
+        error_logging(' 분석용 검색 중 에러 : ' + str(e))

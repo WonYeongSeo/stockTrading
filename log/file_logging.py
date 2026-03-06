@@ -1,6 +1,6 @@
 from time import localtime, strftime
 import shutil
-from helper.constants import CONST_FILE_RISE_LOG, CONST_FILE_RISE_TRA_LOG, CONST_FILE_ERROR_LOG
+from helper.constants import CONST_FILE_RISE_LOG, CONST_FILE_RISE_TRA_LOG, CONST_FILE_ERROR_LOG, CONST_FILE_ANALYSIS_LOG
 from helper.constants import CONST_FILE_PATH_BACKUP, CONST_FILE_NAME_RISE_LOG
 
 def trading_logging(stock, type, msg) :
@@ -35,6 +35,13 @@ def condition_logging(msg) :
         f.write(__current_time + msg + '\n')
 
 
+def analysis_logging(msg) :
+    __current_time = strftime('%Y-%m-%d %H:%M:%S', localtime())
+
+    with open(CONST_FILE_ANALYSIS_LOG, 'a', encoding='utf-8') as f :
+        f.write(__current_time + msg + '\n')
+
+
 def error_logging(msg) :
     __current_time = strftime('%Y-%m-%d %H:%M:%S', localtime())
 
@@ -50,4 +57,6 @@ def log_truncate() :
     with open(CONST_FILE_RISE_LOG, 'w') as f :
         f.truncate(0)
     with open(CONST_FILE_RISE_TRA_LOG, 'w') as f :
+        f.truncate(0)
+    with open(CONST_FILE_ANALYSIS_LOG, 'w') as f :
         f.truncate(0)
