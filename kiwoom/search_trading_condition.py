@@ -5,9 +5,9 @@ from kiwoom import kiwoom_condition, kiwoom_rest_api as api
 from kiwoom.stock import stock_log
 from helper import util
 from helper.constants import CONST_BUY_TOTAL_AMOUNT, CONST_DEPOSIT_MINIMUM_AMOUNT, CONST_EXCEL_DB_TIME
-from helper.constants import CONST_RISE_START_TIME, CONST_RISE_END_TIME, CONST_RISE_SLEEP_TIME
-from helper.constants import CONST_SELL_LOSS_RISE_RATE, CONST_SELL_EARNING_RATE, CONST_SELL_EXCLUDE_RATE
-from log.file_logging import condition_logging, error_logging, analysis_logging
+from helper.constants import CONST_START_TIME, CONST_END_TIME, CONST_SLEEP_TIME
+from helper.constants import CONST_SELL_LOSS_RATE, CONST_SELL_EARNING_RATE, CONST_SELL_EXCLUDE_RATE
+from log.file_logging import search_logging, error_logging, analysis_logging
 # ---------------------------------------------------------------------------------------------------------------------------------
 __today = util.today('%Y%m%d')
 
@@ -42,7 +42,7 @@ def auto_trading(token, old_holding_codes, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT)
             today_holdings = util.today_holdings(old_holding_codes, holdings)
 
             # 금일 매매 마감
-            if datetime.now() > CONST_RISE_END_TIME :
+            if datetime.now() > CONST_END_TIME :
                 # 오늘 매수한 종목 전부 매도처리
                 print(datetime.now(), '*** 오늘 매수한 종목 전부 매도 처리')
                 process_sell_all(token, today_holdings)
@@ -58,7 +58,12 @@ def auto_trading(token, old_holding_codes, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT)
                 break
 
             # 상승주 매매
-            elif datetime.now() > CONST_RISE_START_TIME :
+            elif datetime.now() > CONST_START_TIME :
+                try :
+                    analysis_logging('')
+                except Exception as ae :
+                    print(f'현재시간 파일 저장 중 에러 : {ae}')
+
                 # 당일 매수한 종목에 대한 매도처리
                 process_sell(token, today_holdings, sell_standbys)
 
@@ -68,12 +73,12 @@ def auto_trading(token, old_holding_codes, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT)
                 # 분석용 검색 -------------------------------------------------------------------------------------------------------
                 process_analysis(token, BUY_TOTAL_AMOUNT)
 
-                time.sleep(CONST_RISE_SLEEP_TIME)
+                time.sleep(CONST_SLEEP_TIME)
 
         except Exception as e :
             print(f'### 자동매매 중 에러발생!! : {e}')
             error_logging(' 자동매매 중 에러 : ' + str(e))
-            time.sleep(CONST_RISE_SLEEP_TIME)
+            time.sleep(CONST_SLEEP_TIME)
 
     return is_excel_db_logging
 
@@ -126,7 +131,7 @@ def process_buy_rise(token, holdings, buys, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT
 
             try :
                 # 파일에 저장
-                condition_logging(' 검색종목 ' +  str(list(map(lambda x : str(x.code) + '/' + str(x.name) + '/' + str(x.price), __stocks))))
+                search_logging(' 검색종목 ' +  str(list(map(lambda x : str(x.code) + '/' + str(x.name) + '/' + str(x.price), __stocks))))
 
             except Exception as fe :
                 print(f'### 상승주 조건검색 파일 저장 중 에러발생!! : {fe}')
@@ -167,7 +172,7 @@ def process_sell(token, today_holdings, sell_standbys) :
                             sell_standbys.append(t.code)
                             continue
                         # 수익률이 기준 손절율 이하이면 매도
-                        elif __earn_rate < CONST_SELL_LOSS_RISE_RATE :
+                        elif __earn_rate < CONST_SELL_LOSS_RATE :
                             __is_sell = True
 
                     if __is_sell :

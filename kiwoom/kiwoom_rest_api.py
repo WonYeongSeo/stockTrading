@@ -3,7 +3,6 @@ from kiwoom.stock import Contract, Holding, Stockinfo, TodayStock, TodayTotalEar
 from log import file_logging
 from helper import util
 from helper.constants import CONST_HOST, CONST_SELL_EXCLUDE_RATE
-import json
 
 cont_yn = 'N'
 next_key = ''
