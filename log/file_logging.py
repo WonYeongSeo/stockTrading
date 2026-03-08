@@ -1,7 +1,7 @@
 from time import localtime, strftime
 import shutil
 from helper.constants import CONST_FILE_TRADING_LOG, CONST_FILE_SEARCH_LOG, CONST_FILE_ERROR_LOG, CONST_FILE_ANALYSIS_LOG
-from helper.constants import CONST_FILE_PATH_BACKUP, CONST_FILE_NAME_TRADING_LOG
+from helper.constants import CONST_FILE_PATH_BACKUP, CONST_FILE_NAME_TRADING
 
 def trading_logging(stock, type, msg) :
     try :
@@ -65,8 +65,7 @@ def error_logging(msg) :
 def file_copy() :
     try :
         __current_day = strftime('%Y%m%d', localtime()) + "_"
-        shutil.copy2(CONST_FILE_TRADING_LOG, CONST_FILE_PATH_BACKUP + __current_day + CONST_FILE_NAME_TRADING_LOG)
-        # shutil.copy2(CONST_FILE_RISE_TRA_LOG, CONST_FILE_PATH_BACKUP + __current_day + CONST_FILE_NAME_RISE_TRA_LOG + CONST_FILE_EXTENSION)
+        shutil.copy2(CONST_FILE_TRADING_LOG, CONST_FILE_PATH_BACKUP + __current_day + CONST_FILE_NAME_TRADING)
     except Exception as e :
         print(f'### file_copy 저장 중 에러발생!! : {e}')
         error_logging(' file_copy 저장 중 에러 : ' + str(e))

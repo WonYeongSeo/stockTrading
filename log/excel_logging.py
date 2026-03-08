@@ -40,7 +40,7 @@ def write(total_info, stocks) :
 
     # excle file 이 없으면 copy
     if not __isfile :
-        _copy_excel_path = CONST_EXCEL_FOLDER + CONST_EXCEL_FILE_NAME + '.xlsx' # 복사할 파일
+        _copy_excel_path = CONST_EXCEL_FOLDER + CONST_EXCEL_FILE_NAME + CONST_EXCEL_EXTENSION # 복사할 파일
         shutil.copy2(_copy_excel_path, __excel_path)
 
     # excel file load
