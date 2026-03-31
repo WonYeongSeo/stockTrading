@@ -13,12 +13,13 @@ from helper.constants import CONST_START_TIME, CONST_DEPOSIT_MINIMUM_AMOUNT, CON
 # v1.3 : 에러 로깅 기능 추가
 # v1.4 : 시초가 이상인 경우만 매수
 # v1.5 : 현재가와 고가 차이 체크 추가
-# v2.0 : 매수 시 조검검색종목간 비교 추가(auto_trading_condition, search_trading_condition)
+# v2.0 : 매수 시 조건검색종목간 비교 추가(auto_trading_condition, search_trading_condition)
 # v2.1 : 1분급등조건(급등주) 추가
 # v2.2 : 실행 시 입력값 기능 추가
 # v2.3 : 1분급등조건(급등주)과 3분급등조건(상승주) 매수 함수 분리
 # v2.4 : 1분급등조건(급등주) 매매 삭제
 # v2.5 : 분석용 검색 기능 추가
+# v3.0 : 이전 조건검색된 종목이 매수대기시간이후에 포착 시 매수 기능 추가
 #======================================================================================================
 
 # 예수금 최저 잔고금액 입력받기 - 입력값 없으면 constants 정의된 값으로 진행
@@ -45,7 +46,7 @@ if token :
     # 기존 보유한 종목코드 리스트 - 재 매수 및 매도 대상에서 제외
     old_holding_codes = api.old_holding_codes(token)
 
-    # 1분급등/ 3분급등 자동 매매
+    # 자동 매매
     is_excel_db_logging = search_trading_condition.auto_trading(token, old_holding_codes, DEPOSIT_MIN_AMOUNT, BUY_TOTAL_AMOUNT)
 
     # 오늘 매매결과 excel/Dababase에 저장

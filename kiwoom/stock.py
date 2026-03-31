@@ -55,6 +55,14 @@ class Stockinfo :
         self.open_pric = int(open_pric) if open_pric else 0
         self.flu_rt = float(flu_rt) if flu_rt else 0
 
+class SellStock :
+    # code : 종목코드
+    # ordno : 주문번호
+    def __init__(self, code, qty, ordno) :
+        self.code = code.replace('A', '').replace('*','')
+        self.qty = int(qty) if qty else 0
+        self.ordno = str(ordno) if ordno else ''
+
 class Contract :
     # stk_cd : 종목코드
     # stk_nm : 종목명

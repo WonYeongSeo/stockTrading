@@ -1,5 +1,5 @@
 import requests
-from kiwoom.stock import Contract, Holding, Stockinfo, TodayStock, TodayTotalEarnLoss
+from kiwoom.stock import Contract, Holding, Stockinfo, TodayStock, TodayTotalEarnLoss, SellStock
 from log import file_logging
 from helper import util
 from helper.constants import CONST_HOST, CONST_SELL_EXCLUDE_RATE
@@ -163,11 +163,13 @@ def buy(token, code, name, price, qty, trde_tp) :
     __data =  {
 		'dmst_stex_tp': 'KRX', # 국내거래소구분 KRX,NXT,SOR
 		'stk_cd': code, # 종목코드
-		'ord_qty': qty, # 주문수량
-		'ord_uv': price, # 주문단가
+		'ord_qty': str(qty), # 주문수량
+		'ord_uv': str(price), # 주문단가
 		'trde_tp': str(trde_tp), # 매매구분 0:보통 , 3:시장가 , 5:조건부지정가 , 81:장마감후시간외 , 61:장시작전시간외, 62:시간외단일가 , 6:최유리지정가 , 7:최우선지정가 , 10:보통(IOC) , 13:시장가(IOC) , 16:최유리(IOC) , 20:보통(FOK) , 23:시장가(FOK) , 26:최유리(FOK) , 28:스톱지정가,29:중간가,30:중간가(IOC),31:중간가(FOK)
 		'cond_uv': '', # 조건단가
 	}
+    # IOC: 즉시 가능한 수량만 체결 후 나머지 취소.
+    # FOK (Fill or Kill): 전량 체결 아니면 전량 취소
 
     __rep = get_response(token, __end_point, __api_id, __data, cont_yn, next_key)
 
@@ -183,28 +185,86 @@ def buy(token, code, name, price, qty, trde_tp) :
     return __flag
 
 # 주식 매도주문
-def sell(token, code, name, qty) :
+def sell(token, code, name, price, qty, trde_tp) :
     __end_point = '/api/dostk/ordr'
     __api_id = 'kt10001'
     __data =  {
 		'dmst_stex_tp': 'KRX', # 국내거래소구분 KRX,NXT,SOR
 		'stk_cd': code, # 종목코드
-		'ord_qty': qty, # 주문수량
-		'ord_uv': '', # 주문단가
-		'trde_tp': '3', # 매매구분 0:보통 , 3:시장가 , 5:조건부지정가 , 81:장마감후시간외 , 61:장시작전시간외, 62:시간외단일가 , 6:최유리지정가 , 7:최우선지정가 , 10:보통(IOC) , 13:시장가(IOC) , 16:최유리(IOC) , 20:보통(FOK) , 23:시장가(FOK) , 26:최유리(FOK) , 28:스톱지정가,29:중간가,30:중간가(IOC),31:중간가(FOK)
+		'ord_qty': str(qty), # 주문수량
+		'ord_uv': str(price), # 주문단가
+		'trde_tp': str(trde_tp), # 매매구분 0:보통 , 3:시장가 , 5:조건부지정가 , 81:장마감후시간외 , 61:장시작전시간외, 62:시간외단일가 , 6:최유리지정가 , 7:최우선지정가 , 10:보통(IOC) , 13:시장가(IOC) , 16:최유리(IOC) , 20:보통(FOK) , 23:시장가(FOK) , 26:최유리(FOK) , 28:스톱지정가,29:중간가,30:중간가(IOC),31:중간가(FOK)
 		'cond_uv': '', # 조건단가
 	}
+    # IOC: 즉시 가능한 수량만 체결 후 나머지 취소.
+    # FOK (Fill or Kill): 전량 체결 아니면 전량 취소
 
     __rep = get_response(token, __end_point, __api_id, __data, cont_yn, next_key)
 
     __flag = False
-
     if __rep :
         if __rep.json()['return_code'] == 0 :
             __flag = True
         else :
             # print('*** 매도 시 에러 발생 : ', datetime.now(), rep.json()['return_msg'])
             file_logging.trading_logging('', 'SELL', '매도 시 에러 발생 : ' + code + '/' + name + '/' + __rep.json()['return_msg'])
+
+    return __flag
+
+# 매도주문 후 주문번호 set
+def sell_ordno(token, code, name, price, qty, trde_tp, sells) :
+    __end_point = '/api/dostk/ordr'
+    __api_id = 'kt10001'
+    __data =  {
+		'dmst_stex_tp': 'KRX', # 국내거래소구분 KRX,NXT,SOR
+		'stk_cd': code, # 종목코드
+		'ord_qty': str(qty), # 주문수량
+		'ord_uv': str(price), # 주문단가
+		'trde_tp': str(trde_tp), # 매매구분 0:보통 , 3:시장가 , 5:조건부지정가 , 81:장마감후시간외 , 61:장시작전시간외, 62:시간외단일가 , 6:최유리지정가 , 7:최우선지정가 , 10:보통(IOC) , 13:시장가(IOC) , 16:최유리(IOC) , 20:보통(FOK) , 23:시장가(FOK) , 26:최유리(FOK) , 28:스톱지정가,29:중간가,30:중간가(IOC),31:중간가(FOK)
+		'cond_uv': '', # 조건단가
+	}
+    # IOC: 즉시 가능한 수량만 체결 후 나머지 취소.
+    # FOK (Fill or Kill): 전량 체결 아니면 전량 취소
+
+    __rep = get_response(token, __end_point, __api_id, __data, cont_yn, next_key)
+
+    if __rep :
+        __info = __rep.json()
+        if __info['return_code'] == 0 :
+            __ord_no =__info['ord_no'] # 주문번호
+            if sells :
+                __old = list(filter(lambda x: x.code == code, sells))
+                if __old :
+                    sells.remove(__old[0])
+            sells.append(SellStock(code, qty, __ord_no))
+        else :
+            # print('*** 매도 시 에러 발생 : ', datetime.now(), rep.json()['return_msg'])
+            file_logging.trading_logging('', 'SELL', '매도 시 에러 발생 : ' + code + '/' + name + '/' + __info['return_msg'])
+
+    return sells
+
+# 주식 취소주문
+def cancel(token, code, ordno) :
+    __end_point = '/api/dostk/ordr'
+    __api_id = 'kt10003'
+
+    __data =  {
+		'dmst_stex_tp': 'KRX', # 국내거래소구분 KRX,NXT,SOR
+		'orig_ord_no': str(ordno), # 원주문번호
+		'stk_cd': code, # 종목코드
+		'cncl_qty': '0', # 취소수량 '0' 입력시 잔량 전부 취소
+	}
+
+    __rep = get_response(token, __end_point, __api_id, __data, cont_yn, next_key)
+
+    __flag = False
+    if __rep :
+        __info = __rep.json()
+        if __info['return_code'] == 0 :
+            __flag = True
+        else :
+            # print('*** 취소 시 에러 발생 : ', datetime.now(), rep.json()['return_msg'])
+            file_logging.trading_logging('', 'SELL', '취소 시 에러 발생 : ' + code  + '/' + ordno + '/'+ '/' + __info['return_msg'])
 
     return __flag
 

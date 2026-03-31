@@ -1,6 +1,6 @@
 import math
 from datetime import date, datetime, timedelta
-from helper.constants import CONST_BUY_PRICE_RATE, CONST_SELL_EXCLUDE_AMOUNT
+from helper.constants import CONST_BUY_PRICE_RATE, CONST_SELL_PRICE_RATE, CONST_SELL_EXCLUDE_AMOUNT
 
 # 오늘날짜 가져오기
 def today(format) :
@@ -26,7 +26,11 @@ def convert_bid_unit(price) :
 
 # 매수 호가금액 구하기
 def get_buy_price(price) :
-    return convert_bid_unit(int(price) + int(int(price) * CONST_BUY_PRICE_RATE))
+    return convert_bid_unit(int(price) + int(int(price) * CONST_BUY_PRICE_RATE / 100))
+
+# 매도 호가금액 구하기
+def get_sell_price(price) :
+    return convert_bid_unit(int(price) + int(int(price) * CONST_SELL_PRICE_RATE / 100))
 
 # 당일 매수해서 보유한 종목만 추출
 def today_holdings(old_holding_codes, holdings) :
